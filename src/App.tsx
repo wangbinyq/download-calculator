@@ -31,7 +31,7 @@ function makeDownalodItem(): DownloadItem {
 
 const App: React.FC = () => {
   
-  const items = useLocalStore<DownloadItem[]>(() => [])
+  const store = useLocalStore<{ items: DownloadItem[] }>(() => ({ items: [] }))
 
   const makeColumn = (title: string, key: keyof DownloadItem, EditCompnent: any) => ({
     title, dataIndex: key, render (val: any, item: DownloadItem, idx: number) {
@@ -51,7 +51,7 @@ const App: React.FC = () => {
 
   const onAddItem = () => {
     const item = makeDownalodItem();
-    items.unshift(item)
+    store.items = [item, ...store.items]
   }
 
   const columns = [
@@ -62,14 +62,14 @@ const App: React.FC = () => {
     ].map(c => makeColumn(c.title, c.dataIndex as keyof DownloadItem, c.component, )),
     { title: '进度', dataIndex: 'progress' },
     { title: '剩余时间', dataIndex: 'remainTime' },
-    { title: '操作', dataIndex: 'action', render (val: any, item: DownloadItem, idx: number)  {
+    { title: '操作', dataIndex: 'action', width: 150, render (val: any, item: DownloadItem, idx: number)  {
       if (item.edit) {
         return (<>
-          <Button type="primary" onClick={() => items[idx] = { ...item.edit } as DownloadItem }>保存</Button>
-          <Button onClick={() => item.edit = null}>取消</Button>
+          <Button size="small" type="primary" onClick={() => store.items[idx] = { ...item.edit } as DownloadItem }>保存</Button>
+          <Button size="small" onClick={() => store.items[idx].edit = null}>取消</Button>
         </>)
       }
-      return <Button type="default" onClick={() => item.edit = { ...item }}>编辑</Button>
+      return <Button size="small" type="default" onClick={() => item.edit = { ...item }}>编辑</Button>
     }}
   ]
 
@@ -79,12 +79,12 @@ const App: React.FC = () => {
         <div className="table-wrapper">
           <div className="table-header">
             <Button type="primary" onClick={onAddItem}>
-                添加
+              添加
             </Button>
           </div>
-          <Table columns={columns} dataSource={items}
+          <Table columns={columns} dataSource={store.items}
             rowKey="name"
-            bordered 
+            bordered
             pagination={false}>
           </Table>
         </div>
