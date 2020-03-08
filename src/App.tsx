@@ -1,5 +1,4 @@
-import React from 'react';
-import {  useLocalStore, useObserver } from 'mobx-react';
+import React, { useState } from 'react';
 import zhCN from 'antd/es/locale/zh_CN';
 import { Table, Button, ConfigProvider } from 'antd';
 import './App.scss';
@@ -31,7 +30,7 @@ function makeDownalodItem(): DownloadItem {
 
 const App: React.FC = () => {
   
-  const store = useLocalStore<{ items: DownloadItem[] }>(() => ({ items: [] }))
+  const [ items, updateItems ] = useState<DownloadItem[]>([])
 
   const makeColumn = (title: string, key: keyof DownloadItem, EditCompnent: any) => ({
     title, dataIndex: key, render (val: any, item: DownloadItem, idx: number) {
@@ -51,7 +50,7 @@ const App: React.FC = () => {
 
   const onAddItem = () => {
     const item = makeDownalodItem();
-    store.items = [item, ...store.items]
+    items.unshift(item)
   }
 
   const columns = [
@@ -65,15 +64,15 @@ const App: React.FC = () => {
     { title: '操作', dataIndex: 'action', width: 150, render (val: any, item: DownloadItem, idx: number)  {
       if (item.edit) {
         return (<>
-          <Button size="small" type="primary" onClick={() => store.items[idx] = { ...item.edit } as DownloadItem }>保存</Button>
-          <Button size="small" onClick={() => store.items[idx].edit = null}>取消</Button>
+          <Button size="small" type="primary" onClick={() => items[idx] = { ...item.edit } as DownloadItem }>保存</Button>
+          <Button size="small" onClick={() => items[idx].edit = null}>取消</Button>
         </>)
       }
       return <Button size="small" type="default" onClick={() => item.edit = { ...item }}>编辑</Button>
     }}
   ]
 
-  return useObserver(() => (
+  return (
     <ConfigProvider locale={zhCN}>
       <div className="app">
         <div className="table-wrapper">
@@ -82,7 +81,7 @@ const App: React.FC = () => {
               添加
             </Button>
           </div>
-          <Table columns={columns} dataSource={store.items}
+          <Table columns={columns} dataSource={items}
             rowKey="name"
             bordered
             pagination={false}>
@@ -90,7 +89,7 @@ const App: React.FC = () => {
         </div>
       </div>
     </ConfigProvider>
-  ));
+  );
 }
 
 export default App;
